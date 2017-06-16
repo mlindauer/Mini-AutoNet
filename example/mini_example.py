@@ -25,6 +25,6 @@ labels = np.random.randint(10, size=(1000, 1))
 one_hot_labels = keras.utils.to_categorical(labels, num_classes=10)
 
 an = AutoNet()
-an.fit(X=labels, Y=one_hot_labels, epochs=100)
+an.fit(X=labels, Y=one_hot_labels, epochs=100, func_budget=10)
 
 Y = an.predict(X=labels)

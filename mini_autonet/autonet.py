@@ -1,4 +1,5 @@
 import random
+import functools
 import logging
 
 import numpy as np
@@ -17,6 +18,8 @@ from ConfigSpace.conditions import EqualsCondition, InCondition, AndConjunction,
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace import Configuration
 
+from smac.tae.execute_func import ExecuteTAFuncDict
+from smac.scenario.scenario import Scenario
 from smac.facade.smac_facade import SMAC
 
 class AutoNet(object):
@@ -113,17 +116,41 @@ class AutoNet(object):
             config = self.cs.get_default_configuration()
         else:
             #TODO: run SMAC 
-            pass
+            config = self.call_smac(X=X, Y=Y, 
+                                    epochs=epochs, 
+                                    output_activation=output_activation, 
+                                    loss_func=loss_func, 
+                                    do_plot=do_plot, 
+                                    func_budget=func_budget)
+        
+        self._fit(config=config,
+                  seed=42,
+                  instance=None,
+                  X=X,Y=Y,
+                  epochs=epochs,
+                  output_activation=output_activation,
+                  loss_func=loss_func,
+                  do_plot=do_plot)
         
         self.logger.info("Final Configuration")
         self.logger.info(str(config))
+        
+    def _fit(self, config:Configuration,
+            seed:int,
+            instance,
+            X, Y, 
+            epochs:int=1, 
+            output_activation:str="softmax", 
+            loss_func:str='categorical_crossentropy', 
+            do_plot:bool=True):
+        
+        self.logger.info(config)
         
         self.model = self._build_dnn(config=config,
                         n_input_neurons=X.shape[1],
                         n_output_neurons=Y.shape[1],
                         output_activation=output_activation)
         optimizer = self._build_optimizer(config=config)
-        
 
         self.model.compile(
               loss='categorical_crossentropy',
@@ -138,6 +165,12 @@ class AutoNet(object):
                                  )
         if do_plot is True:
             self._plot(history=history)
+            
+        final_error = history.history["loss"][-1] 
+            
+        self.logger.info("Error: %f" %(final_error))
+            
+        return final_error
     
     def _build_dnn(self, 
                    config:Configuration,
@@ -182,6 +215,42 @@ class AutoNet(object):
         plt.legend(['train loss', 'train acc'], loc='upper right')
         plt.savefig("loss_dnn_%d.png" %(random.randint(1,2**31)))
         
+    def call_smac(self, X, Y, 
+                    epochs:int=1, 
+                    output_activation:str="softmax", 
+                    loss_func:str='categorical_crossentropy', 
+                    do_plot:bool=True,
+                    func_budget:int=1):
+        
+        taf = ExecuteTAFuncDict(functools.partial(self._fit, 
+                                                  X=X, Y=Y, 
+                                                  epochs=epochs, 
+                                                  output_activation=output_activation,
+                                                  loss_func=loss_func,
+                                                  do_plot=do_plot))
+        
+        ac_scenario = Scenario({"run_obj": "quality",  # we optimize quality
+                                "runcount-limit": func_budget,
+                                "cs": self.cs,  # configuration space
+                                "deterministic": "true",
+                                "output-dir" : ""
+                                })
+        
+        # Optimize
+        self.logger.info(
+            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        self.logger.info("Start Configuration")
+        self.logger.info(
+            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        smac = SMAC(scenario=ac_scenario, 
+                    tae_runner=taf,
+                    rng=np.random.RandomState(42))
+        incumbent = smac.optimize()
+
+        self.logger.info("Final Incumbent: %s" % (incumbent))
+        
+        return incumbent
+    
     def predict(self, X):
         
         if self.model is None:
