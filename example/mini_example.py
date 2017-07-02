@@ -18,13 +18,11 @@ import numpy as np
 from mini_autonet.autonet import AutoNet
 
 # dummy data
+N_CLASSES = 10
 data = np.random.random((1000, 100))
-labels = np.random.randint(10, size=(1000, 1))
+labels = np.random.randint(N_CLASSES, size=(1000, 1))
 
-# Convert labels to categorical one-hot encoding
-one_hot_labels = keras.utils.to_categorical(labels, num_classes=10)
+an = AutoNet(max_layers=5, n_classes=N_CLASSES)
+an.fit(X_train=data, y_train=labels, X_valid=data, y_valid=labels, max_expochs=100)
 
-an = AutoNet()
-an.fit(X=labels, Y=one_hot_labels, epochs=100, func_budget=10)
-
-Y = an.predict(X=labels)
+#Y = an.predict(X=labels)
