@@ -211,7 +211,10 @@ class Intensifier(object):
         chall_id = run_history.config_ids[challenger]
         runkey = RunKey(chall_id, None, 0)
         runvalue = run_history.data[runkey]
-        del runvalue.additional_info["model"]
+        try:
+            del runvalue.additional_info["model"]
+        except KeyError:
+            pass
         
         if epoch == self.max_epochs -1:
             self.learning_curves.append(learning_curve)
