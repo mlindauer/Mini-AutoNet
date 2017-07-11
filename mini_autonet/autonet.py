@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from param_net.param_fcnet import ParamFCNetClassification
+from keras.losses import categorical_crossentropy
 
 from smac.tae.execute_func import ExecuteTAFuncDict
 from smac.scenario.scenario import Scenario
@@ -25,7 +26,8 @@ class AutoNet(object):
 
     def fit(self, X_train, y_train, X_valid, y_valid, 
             max_epochs:int,
-            runcount_limit:int=100):
+            runcount_limit:int=100,
+            loss_func=categorical_crossentropy):
 
 
         def obj_func(config, instance=None, seed=None, pc=None):
@@ -33,7 +35,8 @@ class AutoNet(object):
             # otherwise, construct new DNN 
             if pc is None:
                 pc = ParamFCNetClassification(config=config, n_feat=X_train.shape[1],
-                                          n_classes=self.n_classes)
+                                              n_classes=self.n_classes,
+                                              loss_function=loss_func)
                 
             history = pc.train(X_train=X_train, y_train=y_train, X_valid=X_valid,
                                y_valid=y_valid, n_epochs=1)
