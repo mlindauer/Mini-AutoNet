@@ -9,7 +9,7 @@ cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( ins
 cmd_folder = os.path.realpath(os.path.join(cmd_folder, ".."))
 if cmd_folder not in sys.path:
     sys.path.insert(0,cmd_folder)
-logging.basicConfig(level="DEBUG")
+logging.basicConfig(level="INFO")
 ##########################################################
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -32,6 +32,6 @@ args_ = parser.parse_args()
 X = np.loadtxt(args_.X)
 Y = np.loadtxt(args_.Y)
 
-an = AutoNet(max_layers=10, n_classes=args_.C)
+an = AutoNet(max_layers=args_.L, n_classes=args_.C)
 an.fit(X_train=X, y_train=Y, X_valid=X, y_valid=Y, 
-       max_epochs=args_.E, runcount_limit=args_.L)
+       max_epochs=args_.E, runcount_limit=args_.R)
