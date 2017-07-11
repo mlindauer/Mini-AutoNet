@@ -201,6 +201,12 @@ class Intensifier(object):
             pc = add_info["model"]
             learning_curve.append(cost)
             
+            if len(self.learning_curves) > 10 and epoch > self.max_epochs / 4:
+                seen_curves  = np.array(self.learning_curves)[:,epoch]
+                if cost > np.median(seen_curves):
+                    self.logger.info("Abort run (%f vs %f)" %(cost,np.median(seen_curves)))
+                    break
+            
         # delete model in runhistory to be more memory efficient
         chall_id = run_history.config_ids[challenger]
         runkey = RunKey(chall_id, None, 0)
