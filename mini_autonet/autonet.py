@@ -37,7 +37,7 @@ class AutoNet(object):
                 
             history = pc.train(X_train=X_train, y_train=y_train, X_valid=X_valid,
                                y_valid=y_valid, n_epochs=1)
-            final_loss = history.history["loss"][-1] 
+            final_loss = history.history["val_loss"][-1] 
             
             return final_loss, {"model": pc}
 
