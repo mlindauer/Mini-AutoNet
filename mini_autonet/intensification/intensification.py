@@ -12,7 +12,7 @@ from smac.optimizer.objective import sum_cost
 from smac.stats.stats import Stats
 from smac.utils.constants import MAXINT, MAX_CUTOFF
 from smac.configspace import Configuration
-from smac.runhistory.runhistory import RunHistory
+from smac.runhistory.runhistory import RunHistory, RunKey
 from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException, CappedRunException, ExecuteTARun
 from smac.utils.io.traj_logging import TrajLogger
 
@@ -200,6 +200,12 @@ class Intensifier(object):
                                             pc=pc)
             pc = add_info["model"]
             learning_curve.append(cost)
+            
+        # delete model in runhistory to be more memory efficient
+        chall_id = run_history.config_ids[challenger]
+        runkey = RunKey(chall_id, None, 0)
+        runvalue = run_history.data[runkey]
+        del runvalue.additional_info["model"]
         
         if epoch == self.max_epochs -1:
             self.learning_curves.append(learning_curve)
