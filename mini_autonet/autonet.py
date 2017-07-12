@@ -70,4 +70,7 @@ class AutoNet(object):
                     tae_runner=taf,
                     rng=np.random.RandomState(42),
                     intensifier=intensifier)
+        
+        smac.solver.runhistory.overwrite_existings = True
+        
         incumbent = smac.optimize()
