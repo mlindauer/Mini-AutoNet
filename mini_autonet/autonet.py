@@ -38,7 +38,8 @@ class AutoNet(object):
                 K.clear_session()
                 pc = ParamFCNetClassification(config=config, n_feat=X_train.shape[1],
                                               n_classes=self.n_classes,
-                                              loss_function=loss_func)
+                                              max_num_epochs=max_epochs,
+                                              verbose=0)
                 
             history = pc.train(X_train=X_train, y_train=y_train, X_valid=X_valid,
                                y_valid=y_valid, n_epochs=1)
@@ -48,7 +49,9 @@ class AutoNet(object):
 
 
         taf = SimpleTAFunc(obj_func)
-        cs = ParamFCNetClassification.get_config_space(max_num_layers=self.max_layers)
+        cs = ParamFCNetClassification.get_config_space(max_num_layers=self.max_layers,
+                                                       loss_functions=[loss_func],
+                                                       output_activations=['softmax'])
         ac_scenario = Scenario({"run_obj": "quality",  # we optimize quality
                                 "runcount-limit": max_epochs*runcount_limit,
                                 "cost_for_crash": 10, 
