@@ -1,1 +1,2 @@
-git+https://mlindauer@bitbucket.org/aadfreiburg/param_net.git
+smac
+git+https://bitbucket.org/aadfreiburg/param_net.git

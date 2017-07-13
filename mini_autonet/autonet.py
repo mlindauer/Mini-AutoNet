@@ -28,7 +28,8 @@ class AutoNet(object):
     def fit(self, X_train, y_train, X_valid, y_valid, 
             max_epochs:int,
             runcount_limit:int=100,
-            loss_func=categorical_crossentropy):
+            loss_func=categorical_crossentropy,
+            metrics=['accuracy']):
 
 
         def obj_func(config, instance=None, seed=None, pc=None):
@@ -39,7 +40,8 @@ class AutoNet(object):
                 pc = ParamFCNetClassification(config=config, n_feat=X_train.shape[1],
                                               n_classes=self.n_classes,
                                               max_num_epochs=max_epochs,
-                                              verbose=0)
+                                              metrics=metrics,
+                                              verbose=1)
                 
             history = pc.train(X_train=X_train, y_train=y_train, X_valid=X_valid,
                                y_valid=y_valid, n_epochs=1)
@@ -74,3 +76,5 @@ class AutoNet(object):
         smac.solver.runhistory.overwrite_existings = True
         
         incumbent = smac.optimize()
+        
+        return incumbent
