@@ -18,12 +18,15 @@ from mini_autonet.tae.simple_tae import SimpleTAFunc
 
 class AutoNet(object):
     
-    def __init__(self, max_layers:int=5, n_classes:int=2 ):
+    def __init__(self, max_layers:int=5, n_classes:int=2,
+                 use_dropout:bool=False, use_l2_regularization:bool=False):
         self.logger = logging.getLogger("AutoNet")
         
         self.max_layers = max_layers
         self.n_classes = n_classes
     
+        self.use_dropout = use_dropout
+        self.use_l2_regularization = use_l2_regularization
 
     def fit(self, X_train, y_train, X_valid, y_valid, 
             max_epochs:int,
@@ -41,7 +44,7 @@ class AutoNet(object):
                                               n_classes=self.n_classes,
                                               max_num_epochs=max_epochs,
                                               metrics=metrics,
-                                              verbose=1)
+                                              verbose=0)
                 
             history = pc.train(X_train=X_train, y_train=y_train, X_valid=X_valid,
                                y_valid=y_valid, n_epochs=1)
@@ -53,7 +56,9 @@ class AutoNet(object):
         taf = SimpleTAFunc(obj_func)
         cs = ParamFCNetClassification.get_config_space(max_num_layers=self.max_layers,
                                                        loss_functions=[loss_func],
-                                                       output_activations=['softmax'])
+                                                       output_activations=['softmax'],
+                                                       use_l2_regularization=self.use_l2_regularization,
+                                                       use_dropout=self.use_dropout)
         ac_scenario = Scenario({"run_obj": "quality",  # we optimize quality
                                 "runcount-limit": max_epochs*runcount_limit,
                                 "cost_for_crash": 10, 
