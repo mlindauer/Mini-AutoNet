@@ -66,6 +66,8 @@ class Intensifier(object):
         self._num_run = 0
         self._chall_indx = 0
         
+        self._min_time = 1
+        
         self.max_epochs = max_epochs
         
         self.learning_curves = []
