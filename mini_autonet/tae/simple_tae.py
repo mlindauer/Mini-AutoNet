@@ -87,7 +87,15 @@ class SimpleTAFunc(ExecuteTARun):
         """
 
         start_time = time.time()
-        rval = self.ta(config, **self.kwargs)
+        try:
+            rval = self.ta(config, **self.kwargs)
+        except:
+            status = StatusType.CRASHED
+            cost = 20
+            runtime = time.time() - start_time
+            additional_run_info = {}
+            return status, cost, runtime, additional_run_info
+        
         runtime = time.time() - start_time
 
         if isinstance(rval, tuple):
