@@ -200,7 +200,11 @@ class Intensifier(object):
                                             cutoff=2**32-1,
                                             instance_specific=None,
                                             pc=pc)
-            pc = add_info["model"]
+            try:
+                pc = add_info["model"]
+            except KeyError: # model building failed, e.g. because of nan
+                break
+            
             learning_curve.append(cost)
             
             if len(self.learning_curves) > 10 and epoch > self.max_epochs / 4:
